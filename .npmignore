@@ -1,8 +1,4 @@
 /node_modules/
 /.idea/
-/git_gpg_keys.asc
-/git_gpg_keys.asc.enc
-/prepare-gpg-key.sh
-/.releaserc.js
-/.travis.yml
-/yarn.lock
+/.releaserc.cjs
+/.github/

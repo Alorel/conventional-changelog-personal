@@ -16,6 +16,6 @@ module.exports = {
     }
   ],
   generateNotes: {
-    config: require.resolve('./index.js')
+    config: './index.js',
   }
 };

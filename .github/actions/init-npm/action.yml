@@ -1,0 +1,25 @@
+inputs:
+  node-version:
+    description: Node version
+    required: true
+    default: '20'
+  gh-token:
+    description: GH token
+    required: true
+    default: ${{ github.token }}
+name: Set up npm
+description: Set up npm and install dependencies
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v3
+      name: Set up node
+      with:
+        cache: npm
+        node-version: ${{ inputs.node-version }}
+        registry-url: https://npm.pkg.github.com
+    - name: Install deps
+      run: npm ci --no-fund
+      shell: bash
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.gh-token }}
