@@ -1,4 +1,6 @@
-module.exports = {
+import {createRequire} from 'node:module';
+
+export default {
   branch: 'master',
   tagFormat: '${version}',
   prepare: [
@@ -16,6 +18,6 @@ module.exports = {
     }
   ],
   generateNotes: {
-    config: require.resolve('./index.js')
+    config: createRequire(import.meta.url).resolve('./index.mjs'),
   }
 };

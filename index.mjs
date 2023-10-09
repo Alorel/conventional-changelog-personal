@@ -1,12 +1,4 @@
-const GK_REGEX = /update.+to\s+version\s+/i;
-
-function isGreenkeeperLockfileCommit(commit) {
-  return commit.scope === 'package' && (commit.message || '').toLowerCase().includes('update lockfile');
-}
-
-function isGreenkeeperUpdate(commit) {
-  return commit.message && GK_REGEX.test(commit.message);
-}
+import ng from 'conventional-changelog-angular';
 
 function getCfg() {
   const env = process.env.CHANGELOG_ALOREL_CFG;
@@ -37,7 +29,6 @@ function getCfg() {
       chore: 'Maintenance',
       tweak: 'Tweaks'
     },
-    skipGreenkeeperLockfileCommit: true,
     ignoreReleaseScope: true
   };
 
@@ -59,16 +50,6 @@ function processCommitType(commit) {
     return false;
   }
 
-  if (isGreenkeeperUpdate(commit)) {
-    if (commit.type === 'chore') {
-      return false;
-    }
-
-    commit.type = 'Dependency updates';
-
-    return true;
-  }
-
   let typeMatched = false;
 
   for (const type of Object.keys(cfg.texts)) {
@@ -76,10 +57,6 @@ function processCommitType(commit) {
       if (commit.type === 'chore') {
         if (cfg.enable.chore) {
           commit.type = cfg.texts.chore;
-
-          if (!isGreenkeeperLockfileCommit(commit) || !cfg.skipGreenkeeperLockfileCommit) {
-            typeMatched = true;
-          }
         }
 
         break;
@@ -127,34 +104,33 @@ function processReferences(commit, ctx) {
     .filter(reference => !issues.includes(reference.issue));
 }
 
-module.exports = require('conventional-changelog-angular')
-  .then(ng => {
-    Object.assign(ng.writerOpts, {
-      transform(commit, context) {
-        const discard = !(commit.notes || []).length;
+export default async function createChangelogPreset() {
+  const cfg = await ng();
 
-        for (const note of commit.notes) {
-          // noinspection JSPrimitiveTypeWrapperUsage
-          note.title = 'BREAKING CHANGES';
-        }
+  cfg.writerOpts.transform = function transform(commit, context) {
+    const discard = !(commit.notes || []).length;
 
-        if (!processCommitType(commit) && discard) {
-          return;
-        }
+    for (const note of commit.notes) {
+      // noinspection JSPrimitiveTypeWrapperUsage
+      note.title = 'BREAKING CHANGES';
+    }
 
-        if (commit.scope === '*') {
-          commit.scope = '';
-        }
+    if (!processCommitType(commit) && discard) {
+      return;
+    }
 
-        if (typeof commit.hash === 'string') {
-          commit.shortHash = commit.hash.substring(0, 7);
-        }
+    if (commit.scope === '*') {
+      commit.scope = '';
+    }
 
-        processReferences(commit, context);
+    if (typeof commit.hash === 'string') {
+      commit.shortHash = commit.hash.substring(0, 7);
+    }
 
-        return commit
-      }
-    });
+    processReferences(commit, context);
 
-    return ng;
-  });
+    return commit
+  };
+
+  return cfg;
+}

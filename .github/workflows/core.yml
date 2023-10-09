@@ -1,0 +1,51 @@
+name: Core
+on:
+  push:
+    branches: [master]
+  pull_request: {}
+  
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: NPM Init
+        uses: ./.github/actions/init-npm
+      - name: Test
+        run: npm run test
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    permissions:
+      packages: read
+      contents: write
+    needs:
+      - test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1000
+      - name: Init NPM
+        uses: ./.github/actions/init-npm
+      - uses: actions/setup-node@v3
+        name: Reconfig Node
+        with:
+          registry-url: https://registry.npmjs.org
+      - name: Release
+        run: semantic-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
