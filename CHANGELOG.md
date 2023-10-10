@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/Alorel/conventional-changelog-personal/compare/2.1.3...3.0.0) (2023-10-10)
+
+
+### Maintenance
+
+* Update `conventional-changelog-angular` to v7 ([eac826a](https://github.com/Alorel/conventional-changelog-personal/commit/eac826a5479d767ca39682b9557fec60a7dd7c8e))
+
+
+### BREAKING CHANGES
+
+* Now requires semantic-release@^22
+
 ## [2.1.3](https://github.com/Alorel/conventional-changelog-personal/compare/2.1.2...2.1.3) (2020-04-27)
 
 
